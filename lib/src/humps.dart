@@ -1,157 +1,177 @@
-/// Converts the keys of a [Map] from snake case to camel case.
-///
-/// Iterates through all key-value pairs in the map, converting each key to
-/// camel case. For nested map values that are themselves maps, recursively
-/// converts their keys to camel case as well.
-extension MapCamelizeKeys on Map<String, dynamic> {
-  /// Converts this JSON map's keys to camel case.
+extension StringHumps on String {
+  /// Converts a string from snake_case to camelCase.
   ///
-  /// Iterates through all key-value pairs in this map, converting each key to
-  /// camel case. For map values that are
-  /// themselves maps, recursively converts their keys to camel case as well.
-  /// ```dart
-  /// {
-  ///   '_id': 'value',
-  ///   'some_key': 'value',
-  ///   'nested_key': {
-  ///     'another_key': 'value',
-  ///     'nested_key': {'another_key': 'value'},
-  ///   },
-  /// };
-  /// ```
-  ///
-  /// Woulf became:
-  ///
-  ///```dart
-  /// {
-  ///   '_id': 'value',
-  ///   'someKey': 'value',
-  ///   'nestedKey': {
-  ///     'anotherKey': 'value',
-  ///     'nestedKey': {'anotherKey': 'value'},
-  ///   },
-  /// }
-  /// ```
-  Map<String, dynamic> toCamelCase() {
-    final newMap = <String, dynamic>{};
+  /// Returns the converted string in camelCase.
+  String camelize() {
+    if (isEmpty) return this;
 
-    forEach((key, value) {
-      final camelCasedKey = _camelCase(key);
+    final parts = split(RegExp(r'[-_\s]+'));
+    final result = StringBuffer(parts[0]);
 
-      if (value is Map<String, dynamic>) {
-        newMap[camelCasedKey] = value.toCamelCase();
-      } else if (value is List) {
-        newMap[camelCasedKey] = value
-            .map((item) =>
-                item is Map<String, dynamic> ? item.toCamelCase() : item)
-            .toList();
-      } else {
-        newMap[camelCasedKey] = value;
-      }
-    });
-
-    return newMap;
-  }
-
-  /// Converts the given string to camel case by capitalizing words and removing
-  /// underscores.
-  ///
-  /// If the string starts with an underscore, the underscore is preserved and
-  /// the next word is capitalized.
-  String _camelCase(String key) {
-    if (key.startsWith('_')) {
-      return '_${_capitalizeWords(key.substring(1))}';
+    for (var i = 1; i < parts.length; i++) {
+      final part = parts[i];
+      result
+        ..write(part[0].toUpperCase())
+        ..write(part.substring(1));
     }
-    return _capitalizeWords(key);
+
+    return result.toString();
   }
 
-  /// Converts the given string to Title Case by capitalizing the first letter of
-  /// each word and removing underscores.
-  String _capitalizeWords(String key) {
-    return key
-        .split('_')
-        ._mapIndexed((i, word) => i == 0 ? word : word.toCapitalCase())
-        .join();
-  }
+  /// Converts a camelCase string to a decamelized string.
+  ///
+  /// The [separator] parameter is an optional separator to be used between words.
+  /// By default, the separator is an underscore ('_').
+  /// Returns the decamelized string.
+  String decamelize({String separator = '_'}) {
+    if (isEmpty) return this;
 
-  /// Converts keys in this map from camelCase to snake_case.
-  ///
-  /// For example:
-  ///
-  /// ```dart
-  /// {
-  ///   '_id': 'value',
-  ///   'someKey': 'value',
-  ///   'nestedKey': {
-  ///     'anotherKey': 'value',
-  ///     'nestedKey': {'anotherKey': 'value'},
-  ///   },
-  /// }
-  /// ```
-  ///
-  /// Would become:
-  ///
-  /// ```dart
-  /// {
-  ///   '_id': 'value',
-  ///   'some_key': 'value',
-  ///   'nested_key': {
-  ///     'another_key': 'value',
-  ///     'nested_key': {'another_key': 'value'},
-  ///   },
-  /// };
-  /// ```
-  ///
-  Map<String, dynamic> toSnakeCase() {
-    final newMap = <String, dynamic>{};
+    final result = StringBuffer();
+    var previousChar = '';
 
-    forEach((key, value) {
-      final snakeCasedKey = _snakeCase(key);
+    for (var i = 0; i < length; i++) {
+      final char = this[i];
 
-      if (value is Map<String, dynamic>) {
-        newMap[snakeCasedKey] = value.toSnakeCase();
-      } else if (value is List) {
-        newMap[snakeCasedKey] = value
-            .map((item) =>
-                item is Map<String, dynamic> ? item.toSnakeCase() : item)
-            .toList();
+      if (char == char.toUpperCase() && char != separator) {
+        if (previousChar.isNotEmpty && previousChar != separator) {
+          result.write(separator);
+        }
+        result.write(char.toLowerCase());
       } else {
-        newMap[snakeCasedKey] = value;
+        result.write(char.toLowerCase());
       }
-    });
 
-    return newMap;
+      previousChar = char;
+    }
+
+    return result.toString();
   }
 
-  /// Converts the given string to snake case by splitting on uppercase
-  /// characters and joining with underscores before lowercasing.
+  /// Converts a string to PascalCase.
   ///
-  /// This is an internal utility function used to convert keys to snake case.
-  String _snakeCase(String key) {
-    return key.split(RegExp('(?=[A-Z])')).join('_').toLowerCase();
+  /// Takes an input string and converts it to PascalCase by capitalizing the
+  /// first letter of each word
+  /// and removing any non-alphanumeric characters.
+  ///
+  /// Example:
+  /// ```dart
+  /// String input = "hello_world";
+  /// String pascalCase = input.pascalize();
+  /// print(pascalCase); // Output: "HelloWorld"
+  /// ```
+  String pascalize() {
+    if (isEmpty) return this;
+
+    final parts = split(RegExp(r'[-_\s]+'));
+    final result = StringBuffer();
+
+    for (final part in parts) {
+      result
+        ..write(part[0].toUpperCase())
+        ..write(part.substring(1));
+    }
+
+    return result.toString();
+  }
+
+  /// Converts a PascalCase string to a lowercased string with words separated
+  ///  by a specified separator.
+  ///
+  /// The [separator] parameter is an optional separator character used to
+  /// separate words in the resulting string.
+  /// By default, the separator is set to '_'.
+  /// Returns the depascalized string.
+  String depascalize({String separator = '_'}) {
+    if (isEmpty) return this;
+
+    final result = StringBuffer();
+    var previousChar = '';
+
+    for (var i = 0; i < length; i++) {
+      final char = this[i];
+
+      if (char == char.toUpperCase() && char != separator) {
+        if (previousChar.isNotEmpty && previousChar != separator) {
+          result.write(separator);
+        }
+        result.write(char.toLowerCase());
+      } else {
+        result.write(char.toLowerCase());
+      }
+
+      previousChar = char;
+    }
+
+    return result.toString();
   }
 }
 
-/// Extends the [List] class with additional methods.
-///
-/// This extension adds utility methods to make it easier to work with [List]s.
-extension ListExtensions<E> on List<E> {
-  /// Iterates over the elements of the list, passing each element and its
-  /// index to the given [convert] function, and yields the result.
-  Iterable<R> _mapIndexed<R>(R Function(int index, E element) convert) sync* {
-    for (var index = 0; index < length; index++) {
-      yield convert(index, this[index]);
-    }
-  }
-}
+extension MapHumps on Map<String, dynamic> {
+  /// Converts a map with snake_case keys to a map with camelCase keys.
+  ///
+  /// Returns a new map with camelCase keys.
+  Map<String, dynamic> camelizeKeys() {
+    final result = <String, dynamic>{};
 
-/// Extends the [String] class with additional methods.
-///
-/// This extension adds utility methods to make it easier to work with [String]s.
-extension StringX on String {
-  /// Converts the string to capital case by uppercasing the first letter
-  /// and lowercasing the rest of the string.
-  String toCapitalCase() {
-    return '${this[0].toUpperCase()}${substring(1)}';
+    forEach((key, value) {
+      if (value is Map<String, dynamic>) {
+        result[key.camelize()] = value.camelizeKeys();
+      } else {
+        result[key.camelize()] = value;
+      }
+    });
+
+    return result;
+  }
+
+  /// Converts a map with camelCase keys to a map with snake_case keys.
+  ///
+  /// Returns a new map with snake_case keys.
+  Map<String, dynamic> decamelizeKeys() {
+    final result = <String, dynamic>{};
+
+    forEach((key, value) {
+      if (value is Map<String, dynamic>) {
+        result[key.decamelize()] = value.decamelizeKeys();
+      } else {
+        result[key.decamelize()] = value;
+      }
+    });
+
+    return result;
+  }
+
+  /// Converts a map with camelCase keys to a map with PascalCase keys.
+  ///
+  /// Returns a new map with PascalCase keys.
+  Map<String, dynamic> pascalizeKeys() {
+    final result = <String, dynamic>{};
+
+    forEach((key, value) {
+      if (value is Map<String, dynamic>) {
+        result[key.pascalize()] = value.pascalizeKeys();
+      } else {
+        result[key.pascalize()] = value;
+      }
+    });
+
+    return result;
+  }
+
+  /// Converts a map with PascalCase keys to a map with snake_case keys.
+  ///
+  /// Returns a new map with snake_case keys.
+  Map<String, dynamic> depascalizeKeys() {
+    final result = <String, dynamic>{};
+
+    forEach((key, value) {
+      if (value is Map<String, dynamic>) {
+        result[key.depascalize()] = value.depascalizeKeys();
+      } else {
+        result[key.depascalize()] = value;
+      }
+    });
+
+    return result;
   }
 }
