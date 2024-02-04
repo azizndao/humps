@@ -1,3 +1,7 @@
+## 1.0.3
+
+- Fix issues with nested list content
+
 ## 1.0.2
 
 - adding the `decamelize` method on `String` class to convert a camelCase string to snake_case or kebab-case
