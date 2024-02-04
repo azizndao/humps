@@ -1,6 +1,6 @@
 name: humps
 description: A Dart package for converting map keys between camelCase and snake_case. Useful for converting between JSON and Dart field names.
-version: 1.0.1
+version: 1.0.3
 repository: https://github.com/azizndao/humps
 
 environment:

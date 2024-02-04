@@ -116,6 +116,14 @@ extension MapHumps on Map<String, dynamic> {
     forEach((key, value) {
       if (value is Map<String, dynamic>) {
         result[key.camelize()] = value.camelizeKeys();
+      } else if (value is List) {
+        result[key.camelize()] = value.map((item) {
+          if (item is Map<String, dynamic>) {
+            return item.camelizeKeys();
+          } else {
+            return item;
+          }
+        }).toList();
       } else {
         result[key.camelize()] = value;
       }
@@ -133,6 +141,14 @@ extension MapHumps on Map<String, dynamic> {
     forEach((key, value) {
       if (value is Map<String, dynamic>) {
         result[key.decamelize()] = value.decamelizeKeys();
+      } else if (value is List) {
+        result[key.decamelize()] = value.map((item) {
+          if (item is Map<String, dynamic>) {
+            return item.decamelizeKeys();
+          } else {
+            return item;
+          }
+        }).toList();
       } else {
         result[key.decamelize()] = value;
       }
